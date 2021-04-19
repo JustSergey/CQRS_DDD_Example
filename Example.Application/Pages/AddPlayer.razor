@@ -1,0 +1,58 @@
+﻿@page "/Add"
+
+@using Example.Application.Services
+@using Example.Domain
+@using Example.Application.Commands
+@using Example.Application.Queries
+@inject RequestService Service
+@inject NavigationManager Navigation
+
+<h3>Добавить игрока</h3>
+
+@if (teams == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <EditForm Model="command" OnValidSubmit="@Save">
+        <div class="form-group m-1">
+            <InputText @bind-Value="command.Name" />
+        </div>
+        <div class="form-group m-1">
+            <InputSelect @bind-Value="command.TeamId">
+                @foreach (var team in teams)
+                    {
+                    <option value="@team.Id">@team.Title</option>
+                    }
+            </InputSelect>
+        </div>
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <button type="submit" class="btn btn-primary m-1">Сохранить</button>
+    </EditForm>
+}
+
+<button @onclick="@(() => Navigation.NavigateTo("/"))" class="btn btn-secondary">
+    Назад
+</button>
+
+@code {
+    AddPlayerCommand command;
+    List<Team> teams;
+
+    protected async override Task OnInitializedAsync()
+    {
+        command = new();
+        GetTeamsQuery query = new();
+        var response = await Service.Get(query);
+        teams = response.Data;
+        await base.OnInitializedAsync();
+    }
+
+    async Task Save()
+    {
+        await Service.Send(command);
+        Navigation.NavigateTo("/");
+    }
+}

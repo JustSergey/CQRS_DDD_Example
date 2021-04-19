@@ -1,0 +1,59 @@
+﻿@page "/"
+
+@using Example.Application.Services
+@using Example.Domain
+@using Example.Application.Queries
+@inject RequestService Service
+@inject NavigationManager Navigation
+
+<h1>Игроки</h1>
+<button @onclick="@(() => Navigation.NavigateTo("/Add"))" class="btn btn-link">
+    Добавить
+</button>
+
+@if (players == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Команда</th>
+                <th>Очки</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var player in players)
+            {
+                <tr>
+                    <td>@player.Name</td>
+                    <td>@player.Team.Title</td>
+                    <td>@player.Score</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div>
+        Всего: @totalCount
+    </div>
+}
+
+@code {
+    private List<Player> players;
+    private int totalCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        GetPlayersQuery query = new()
+        {
+            Page = 1,
+            PageSize = 10
+        };
+        var response = await Service.Get(query);
+        players = response.Data;
+        totalCount = response.TotalCount;
+    }
+}
