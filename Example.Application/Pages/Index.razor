@@ -49,6 +49,7 @@ else
     {
         GetPlayersQuery query = new()
         {
+            OrderSelector = p => p.Name,
             Page = 1,
             PageSize = 10
         };
